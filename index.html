@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Shree Mangalmurti Krushi Seva Kendra | Smart Agriculture Solutions</title>
+  <meta name="description" content="Shree Mangalmurti Krushi Seva Kendra provides quality fertilizers, pesticides, seeds, and expert farming guidance to help farmers increase productivity.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Auth Gate Overlay — blocks access until login -->
+  <div id="authGate" class="auth-gate">
+    <div class="auth-gate-content">
+      <div class="auth-gate-logo">
+        <i class="fas fa-seedling"></i>
+      </div>
+      <h2>Welcome to Shree Mangalmurti</h2>
+      <p>KRUSHI SEVA KENDRA</p>
+      <p class="auth-gate-desc">Login or create an account to access premium farming solutions, purchase products, and get expert crop guidance.</p>
+      <div class="auth-gate-buttons">
+        <button type="button" class="btn-primary auth-gate-login" id="gateLoginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <button type="button" class="btn-outline auth-gate-register" id="gateRegisterBtn"><i class="fas fa-user-plus"></i> Register</button>
+      </div>
+      <div class="auth-gate-features">
+        <div class="auth-gate-feature"><i class="fas fa-store"></i><span>Browse 100+ Products</span></div>
+        <div class="auth-gate-feature"><i class="fas fa-truck"></i><span>Doorstep Delivery</span></div>
+        <div class="auth-gate-feature"><i class="fas fa-headset"></i><span>Expert Support</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <span>🌾 Trusted by 10,000+ Farmers</span>
+      <span>📞 Expert Guidance: +91 98765 43210</span>
+    </div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="main-header">
+    <div class="container header-flex">
+      <div class="logo">
+        <h1>Shree Mangalmurti</h1>
+        <p>KRUSHI SEVA KENDRA</p>
+      </div>
+      <nav class="nav-links">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#products" class="nav-link">Products</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+      <div class="right-controls">
+        <div class="language-selector">
+          <i class="fas fa-globe"></i>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="mr">मराठी</option>
+          </select>
+        </div>
+        <div class="auth-buttons" id="authButtons">
+          <button type="button" class="login-btn" id="loginBtn"><i class="fas fa-user"></i> Login</button>
+          <button type="button" class="register-btn" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
+        </div>
+        <div class="user-info" id="userInfo" style="display: none;">
+          <span id="userNameDisplay"></span>
+          <button type="button" class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          <button type="button" class="admin-btn" id="adminPanelBtn" style="display:none;"><i class="fas fa-crown"></i> Admin</button>
+        </div>
+        <button class="shop-btn" id="shopNowBtn">
+          <i class="fas fa-shopping-cart"></i> Cart (<span id="cartCount">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" data-modal="loginModal">&times;</span>
+      <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
+      <div id="loginError" class="form-error" style="display:none;"></div>
+      <form id="loginForm">
+        <input type="email" placeholder="Email" id="loginEmail" required>
+        <input type="password" placeholder="Password" id="loginPassword" required>
+        <button type="submit">Login</button>
+        <p class="modal-footer">Don't have an account? <a href="#" id="switchToRegister">Register here</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" data-modal="registerModal">&times;</span>
+      <h3><i class="fas fa-user-plus"></i> Register</h3>
+      <div id="registerError" class="form-error" style="display:none;"></div>
+      <div id="registerSuccess" class="form-success" style="display:none;"></div>
+      <form id="registerForm">
+        <input type="text" placeholder="Full Name" id="regName" required minlength="2">
+        <input type="email" placeholder="Email" id="regEmail" required>
+        <input type="password" placeholder="Password (min 6 characters)" id="regPassword" required minlength="6">
+        <select id="regRole">
+          <option value="user">User (Farmer)</option>
+          <option value="admin">Admin (Store Manager)</option>
+        </select>
+        <button type="submit">Register</button>
+        <p class="modal-footer">Already have an account? <a href="#" id="switchToLogin">Login here</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div id="adminPanel" class="modal admin-modal">
+    <div class="modal-content admin-content">
+      <span class="close-modal" data-modal="adminPanel">&times;</span>
+      <h2><i class="fas fa-crown"></i> Admin Dashboard</h2>
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="products">Manage Products</button>
+        <button class="admin-tab" data-tab="orders">View Orders</button>
+        <button class="admin-tab" data-tab="users">Manage Users</button>
+      </div>
+      
+      <!-- Manage Products Tab -->
+      <div id="adminProductsTab" class="admin-tab-content active">
+        <h3>Add New Product</h3>
+        <form id="addProductForm">
+          <input type="text" placeholder="Product Name" id="prodName" required>
+          <textarea placeholder="Product Description" id="prodDesc" rows="2" required></textarea>
+          <input type="number" placeholder="Price (₹)" id="prodPrice" required min="1">
+          <select id="prodCategory">
+            <option value="Fertilizers">Fertilizers</option>
+            <option value="Insecticides">Insecticides</option>
+            <option value="Fungicides">Fungicides</option>
+            <option value="Seeds">Seeds</option>
+            <option value="Plant Growth Boosters">Growth Boosters</option>
+            <option value="Organic">Organic Products</option>
+            <option value="Crop Protection">Crop Protection</option>
+          </select>
+          <input type="text" placeholder="Image URL (optional)" id="prodImage">
+          <button type="submit"><i class="fas fa-plus"></i> Add Product</button>
+        </form>
+        <hr>
+        <h3>Current Products</h3>
+        <div id="adminProductsList"></div>
+      </div>
+      
+      <!-- View Orders Tab -->
+      <div id="adminOrdersTab" class="admin-tab-content">
+        <h3>Customer Orders</h3>
+        <div id="ordersList"></div>
+      </div>
+      
+      <!-- Manage Users Tab -->
+      <div id="adminUsersTab" class="admin-tab-content">
+        <h3>Registered Users</h3>
+        <div id="usersList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" data-modal="cartModal">&times;</span>
+      <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+      <div id="cartItems"></div>
+      <div class="cart-total" id="cartTotal"></div>
+      <button id="checkoutBtn" class="checkout-btn" style="display:none;">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" data-modal="checkoutModal">&times;</span>
+      <h3><i class="fas fa-credit-card"></i> Checkout</h3>
+      <form id="checkoutForm">
+        <input type="text" placeholder="Full Name" id="checkoutName" required>
+        <input type="tel" placeholder="Phone Number" id="checkoutPhone" required>
+        <textarea placeholder="Delivery Address" id="checkoutAddress" rows="3" required></textarea>
+        <div class="checkout-summary" id="checkoutSummary"></div>
+        <select id="paymentMethod">
+          <option value="cod">💵 Cash on Delivery</option>
+          <option value="upi">📱 UPI Payment</option>
+          <option value="card">💳 Card Payment</option>
+        </select>
+        <button type="submit" class="checkout-btn"><i class="fas fa-check"></i> Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Success Modal -->
+  <div id="orderSuccessModal" class="modal">
+    <div class="modal-content order-success-content">
+      <span class="close-modal" data-modal="orderSuccessModal">&times;</span>
+      <div class="order-success-icon">✅</div>
+      <h3>Order Placed Successfully!</h3>
+      <p id="orderSuccessMsg">Your order has been placed. We will contact you for confirmation.</p>
+      <p class="order-id" id="orderIdDisplay"></p>
+      <button onclick="closeModal('orderSuccessModal')" class="checkout-btn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="hero-badge"><i class="fas fa-leaf"></i> Smart Agriculture Solutions</div>
+        <h1>Empowering Farmers with <span class="highlight">Smart Solutions</span></h1>
+        <p>Shree Mangalmurti Krushi Seva Kendra provides quality fertilizers, pesticides, seeds, and expert farming guidance to help farmers increase productivity and crop health.</p>
+        <div class="btn-group">
+          <a href="#products" class="btn-primary"><i class="fas fa-store"></i> Explore Products →</a>
+          <a href="#about" class="btn-outline" id="cropGuidanceBtn"><i class="fas fa-leaf"></i> Get Crop Guidance</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><i class="fas fa-calendar-check"></i><span><strong>15+</strong> Years</span></div>
+          <div class="stat-item"><i class="fas fa-users"></i><span><strong>10k+</strong> Farmers</span></div>
+          <div class="stat-item"><i class="fas fa-trophy"></i><span><strong>100%</strong> Satisfaction</span></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="sidebar-icons">
+          <div class="icon-card"><i class="fas fa-seedling"></i><span>Quality Seeds</span></div>
+          <div class="icon-card"><i class="fas fa-shield-alt"></i><span>Crop Protection</span></div>
+          <div class="icon-card"><i class="fas fa-flask"></i><span>Bio Fertilizers</span></div>
+        </div>
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400&h=350&fit=crop&q=80" alt="Happy Farmer in Green Field" class="hero-img">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products" class="products-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Our Products</span>
+        <h2 class="section-title">Premium Farming Solutions</h2>
+        <p class="section-sub">Browse our complete range of quality farming products trusted by thousands of farmers.</p>
+      </div>
+      <div class="search-filter-area">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search products..."><button id="clearSearch" class="clear-btn">&times;</button></div>
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-chip active" data-filter="all">All Products</button>
+          <button class="filter-chip" data-filter="Fertilizers">🌱 Fertilizers</button>
+          <button class="filter-chip" data-filter="Insecticides">🐛 Insecticides</button>
+          <button class="filter-chip" data-filter="Fungicides">🍄 Fungicides</button>
+          <button class="filter-chip" data-filter="Seeds">🌾 Seeds</button>
+          <button class="filter-chip" data-filter="Plant Growth Boosters">💪 Growth Boosters</button>
+          <button class="filter-chip" data-filter="Organic">🌿 Organic Products</button>
+          <button class="filter-chip" data-filter="Crop Protection">🛡️ Crop Protection</button>
+        </div>
+      </div>
+      <div class="product-stats">
+        <div class="product-count" id="productCount">16 products found</div>
+        <div class="sort-options"><label><i class="fas fa-sort"></i> Sort by:</label><select id="sortSelect"><option value="default">Default</option><option value="price-low">Price: Low to High</option><option value="price-high">Price: High to Low</option><option value="name">Name A-Z</option></select></div>
+      </div>
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="container about-flex">
+      <div class="about-text">
+        <div class="about-badge">ABOUT US</div>
+        <h2>About Shree Mangalmurti Krushi Seva Kendra</h2>
+        <p>Shree Mangalmurti Krushi Seva Kendra is dedicated to supporting farmers with modern agricultural solutions.</p>
+        <div class="values-grid">
+          <div class="value-card"><i class="fas fa-bullseye"></i><h4>Our Mission</h4><p>High-quality products & expert guidance</p></div>
+          <div class="value-card"><i class="fas fa-users"></i><h4>Community</h4><p>Empowered farmers network</p></div>
+          <div class="value-card"><i class="fas fa-microchip"></i><h4>Innovation</h4><p>Modern agricultural techniques</p></div>
+          <div class="value-card"><i class="fas fa-medal"></i><h4>Quality</h4><p>Best products from trusted suppliers</p></div>
+        </div>
+        <div class="years-badge"><i class="fas fa-award"></i> 15+ Years of Service Excellence <i class="fas fa-award"></i></div>
+      </div>
+      <div class="about-right">
+        <div class="weather-card"><i class="fas fa-sun"></i><div class="weather-info"><span class="temp" id="weatherTemp">26°C</span><span class="condition">Clear Sky</span></div><p class="growing-tip">🌱 Ideal growing conditions</p></div>
+        <div class="experience-card"><i class="fas fa-tractor"></i><h3>Trusted Since 2009</h3><p>Serving farmers with dedication</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-section">
+    <div class="container">
+      <div class="section-header"><span class="section-badge">Our Services</span><h2 class="section-title">What We Offer</h2><p class="section-sub">Comprehensive agricultural support for modern farming</p></div>
+      <div class="services-grid">
+        <div class="service-card"><i class="fas fa-flask"></i><h3>Soil Testing</h3><p>Professional soil analysis</p></div>
+        <div class="service-card"><i class="fas fa-chalkboard-user"></i><h3>Expert Guidance</h3><p>One-on-one consultation</p></div>
+        <div class="service-card"><i class="fas fa-truck-fast"></i><h3>Doorstep Delivery</h3><p>Fast delivery to your farm</p></div>
+        <div class="service-card"><i class="fas fa-microphone-alt"></i><h3>Farmer Training</h3><p>Workshops on modern techniques</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="gallery-section">
+    <div class="container">
+      <div class="section-header"><span class="section-badge">Gallery</span><h2 class="section-title">Our Farming Moments</h2><p class="section-sub">Capturing the essence of sustainable agriculture</p></div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <div class="container contact-flex">
+      <div class="contact-info">
+        <h2>Get In Touch</h2>
+        <p>Have questions? We're here to help you with all your farming needs.</p>
+        <div class="contact-details">
+          <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Near Main Market, Kolhapur, Maharashtra - 416001</span></div>
+          <div class="contact-item"><i class="fas fa-phone-alt"></i><span>+91 98765 43210</span></div>
+          <div class="contact-item"><i class="fas fa-envelope"></i><span>care@shreemangalmurtiagri.com</span></div>
+          <div class="contact-item"><i class="fas fa-clock"></i><span>Mon-Sat: 8:00 AM - 7:00 PM</span></div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <form id="contactForm">
+          <div class="form-row"><input type="text" placeholder="Your Name" id="contactName" required><input type="email" placeholder="Your Email" id="contactEmail" required></div>
+          <input type="tel" placeholder="Phone Number" id="contactPhone">
+          <textarea placeholder="Your Message / Query about farming..." rows="4" id="contactMessage" required></textarea>
+          <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-flex">
+        <div class="footer-col"><h3>Shree Mangalmurti</h3><p>KRUSHI SEVA KENDRA</p><div class="social-links"><a href="#"><i class="fab fa-facebook"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+        <div class="footer-col"><h4>Quick Links</h4><a href="#home">Home</a><a href="#products">Products</a><a href="#about">About</a><a href="#contact">Contact</a></div>
+        <div class="footer-col"><h4>Products</h4><a href="#">Fertilizers</a><a href="#">Pesticides</a><a href="#">Seeds</a><a href="#">Organic Products</a></div>
+        <div class="footer-col"><h4>Support</h4><a href="#">Farmer Helpline</a><a href="#">Crop Advisory</a><a href="#">Dealer Locator</a><a href="#">Returns Policy</a></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; 2024 Shree Mangalmurti Krushi Seva Kendra. All rights reserved.</p><p class="edit-credit">Edit with Base44 | Designed for Indian Farmers</p></div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
