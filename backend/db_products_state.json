@@ -1,0 +1,156 @@
+[
+  {
+    "id": 1,
+    "name": "MAXXYIELD Booster",
+    "description": "Premium yield booster by Micropvision Crop Care. Enhances crop health and increases agricultural productivity.",
+    "price": "650.00",
+    "category": "Plant Growth Boosters",
+    "image_url": "images/products/maxxyield.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 2,
+    "name": "Syngenta Ampligo",
+    "description": "Fast-acting insecticide by Syngenta. Provides broad-spectrum control of pests for various crops.",
+    "price": "100.00",
+    "category": "Insecticides",
+    "image_url": "images/products/ampligo.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 3,
+    "name": "WEEDMAR SUPER",
+    "description": "Dhanuka Weedmar Super Herbicide. Effective control of broad-leaf weeds in agricultural fields.",
+    "price": "450.00",
+    "category": "Herbicides",
+    "image_url": "images/products/weedmar_super.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 4,
+    "name": "Tata Tafgor",
+    "description": "Tata Tafgor Insecticide. Contains Dimethoate 30% EC for effective pest management.",
+    "price": "350.00",
+    "category": "Insecticides",
+    "image_url": "images/products/tafgor.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 5,
+    "name": "GreenCARB Organic",
+    "description": "Natural organic carbon enhancer. Improves soil structure and nutrient availability for plants.",
+    "price": "550.00",
+    "category": "Organic",
+    "image_url": "images/products/greencarb.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 6,
+    "name": "Roundup Herbicide",
+    "description": "High-performance Glyphosate herbicide for total weed control. Trusted by farmers worldwide.",
+    "price": "550.00",
+    "category": "Herbicides",
+    "image_url": "images/products/roundup.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 7,
+    "name": "Tata Koranda",
+    "description": "Tata Koranda (Chlorpyriphos 50% + Cypermethrin 5% EC) for effective control of various pests.",
+    "price": "500.00",
+    "category": "Insecticides",
+    "image_url": "images/products/koranda.png",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": "500 ml"
+  },
+  {
+    "id": 8,
+    "name": "Syngenta Alika",
+    "description": "Advanced insecticide for sucking pests. Fast knockdown and long-lasting protection.",
+    "price": "350.00",
+    "category": "Insecticides",
+    "image_url": "images/products/alika.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 9,
+    "name": "Calaris Xtra",
+    "description": "Syngenta herbicide for corn and sugarcane. Superior control over broadleaf and grass weeds.",
+    "price": "1000.00",
+    "category": "Herbicides",
+    "image_url": "images/products/calaris.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": "700 ml"
+  },
+  {
+    "id": 10,
+    "name": "Tarbez Fungicide",
+    "description": "Tarbez systemic fungicide. Effective against a wide range of fungal diseases in crops.",
+    "price": "350.00",
+    "category": "Fungicides",
+    "image_url": "images/products/tarbez.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": "500 ml"
+  },
+  {
+    "id": 11,
+    "name": "Godrej Mokin",
+    "description": "Premium insecticide by Godrej for fruit and vegetable crops. Fast and effective control.",
+    "price": "597.00",
+    "category": "Insecticides",
+    "image_url": "images/products/mokin.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 12,
+    "name": "Tata CONTAF",
+    "description": "Tata Contaf Hexaconazole 5% EC. Systemic fungicide for control of powdery mildew and rust.",
+    "price": "770.00",
+    "category": "Fungicides",
+    "image_url": "images/products/contaf.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": "1 Liter"
+  },
+  {
+    "id": 13,
+    "name": "Gromor NanoDAP",
+    "description": "Efficient fertilizer with nano-technology for better nutrient uptake and higher yields.",
+    "price": "600.00",
+    "category": "Fertilizers",
+    "image_url": "images/products/nanodap.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": ""
+  },
+  {
+    "id": 14,
+    "name": "Glycel Herbicide",
+    "description": "Glyphosate 41% S.L. systemic herbicide for non-selective weed control in plantations.",
+    "price": "500.00",
+    "category": "Herbicides",
+    "image_url": "images/products/glycel.jpg",
+    "stock": 100,
+    "created_at": "2026-04-11T14:38:23.000Z",
+    "size": "1 Liter"
+  }
+]
