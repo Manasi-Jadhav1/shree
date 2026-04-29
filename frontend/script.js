@@ -806,84 +806,35 @@ async function deleteProduct(id) {
     showToast('❌ ' + res.msg);
   }
 }
-async function renderAdminOrders() {
-  const list = document.getElementById('ordersList');
-  const countBadge = document.getElementById('ordersCountBadge');
-
-  list.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading...</td></tr>';
-
-  // ✅ IMPORTANT FIX: Get token from localStorage
-  const token = localStorage.getItem('smk_token');
-
-  try {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">Error: ${errorData.message || 'Unauthorized'}</td></tr>`;
-      return;
-    }
-
-    const orders = await res.json();
-
-    if (countBadge) countBadge.textContent = `${orders.length} orders`;
-
-    if (orders.length === 0) {
-      list.innerHTML = '<tr><td colspan="7" style="color:#999;text-align:center;padding:20px;">No orders yet.</td></tr>';
-      return;
-    }
-
-    list.innerHTML = orders.map(o => {
-      const d = new Date(o.created_at);
-      const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      return `
-        <tr>
-          <td><strong>#${o.id}</strong></td>
-          <td>
-            <div style="font-weight:600;">${o.customer_name}</div>
-            <div style="font-size:0.8rem; color:#666;">${o.phone}</div>
-          </td>
-          <td>
-            <div style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto;">
-              ${o.items.map(i => `
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                  <img src="${i.image_url}" class="mini-thumb" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
-                  <span style="font-size:0.85rem;">${i.name} ${i.size ? `(${i.size})` : ''} <b>×${i.quantity}</b></span>
-                </div>
-              `).join('')}
-            </div>
-          </td>
-          <td style="font-weight:bold;">₹${Number(o.total).toLocaleString()}</td>
-          <td style="text-align:center;">
-            <span class="pay-method-badge">${translateMethod(o.payment_method)}</span>
-            ${o.payment_proof ? `<br><a href="${o.payment_proof}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.75rem; padding:4px 8px; background:#eef6ee; color:#2b5e2f; border:1px solid #2b5e2f; border-radius:4px; text-decoration:none;"><i class="fas fa-image"></i> View Receipt</a>` : ''}
-          </td>
-          <td>${dateStr}</td>
-          <td>
-            <select class="status-select status-${o.status.toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
-              <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>${translateStatus('Processing')}</option>
-              <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>${translateStatus('Shipped')}</option>
-              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>${translateStatus('Delivered')}</option>
-            </select>
-          </td>
-          <td>
-            <button class="admin-delete-btn" onclick="deleteOrder(${o.id})" title="Delete Order">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  } catch (error) {
-    console.error('Error loading orders:', error);
-    list.innerHTML = '<tr><td colspan="7" style="color:red;text-align:center;">Network error: Cannot connect to server</td></tr>';
+function renderAdminProducts() {
+  const list = document.getElementById('adminProductsList');
+  if (!list) return;
+  if (products.length === 0) {
+    list.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No products found.</p>';
+    return;
   }
+
+  list.innerHTML = products.map(p => `
+    <div class="admin-product-item" style="display:flex; align-items:center; gap:15px; padding:15px; border-bottom:1px solid #eee;">
+      <img src="${p.image_url}?t=${Date.now()}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
+      <div style="flex:1;">
+        <div style="font-weight:bold; color:#2b5e2f;">${p.name}</div>
+        <div style="font-size:0.85rem; color:#666;">${p.category} ${p.size ? `• ${p.size}` : ''}</div>
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:#666; display:block;">Price (₹)</label>
+        <input type="number" id="priceInput_${p.id}" value="${p.price}" style="width:80px; padding:5px; border:1px solid #ddd; border-radius:4px;">
+      </div>
+      <div>
+        <label style="font-size:0.8rem; color:#666; display:block;">Size</label>
+        <input type="text" id="sizeInput_${p.id}" value="${p.size || ''}" style="width:80px; padding:5px; border:1px solid #ddd; border-radius:4px;">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" onclick="updateProduct(${p.id})" style="padding:6px 12px; font-size:0.85rem;"><i class="fas fa-save"></i> Save</button>
+        <button class="btn-outline" onclick="deleteProduct(${p.id})" style="padding:6px 12px; font-size:0.85rem; color:#dc3545; border-color:#dc3545; background:transparent;"><i class="fas fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 async function updateOrderStatus(id, status) {
