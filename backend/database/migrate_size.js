@@ -1,11 +1,12 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config(); // ✅ FIXED
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Manasi@2005',
-  database: process.env.DB_NAME || 'mangalmurti_db',
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT, // ✅ IMPORTANT
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -14,38 +15,34 @@ const pool = mysql.createPool({
 async function runMigration() {
   try {
     console.log("Checking for 'size' column...");
-    const [columns] = await pool.query("SHOW COLUMNS FROM products LIKE 'size'");
-    
+
+    const [columns] = await pool.query(
+      "SHOW COLUMNS FROM products LIKE 'size'"
+    );
+
     if (columns.length === 0) {
-      console.log("Adding 'size' column to products table...");
-      await pool.query("ALTER TABLE products ADD COLUMN size VARCHAR(50) DEFAULT ''");
-      console.log("Column added successfully!");
+      console.log("Adding 'size' column...");
+      await pool.query(
+        "ALTER TABLE products ADD COLUMN size VARCHAR(50) DEFAULT ''"
+      );
+      console.log("✅ Column added");
     } else {
-      console.log("'size' column already exists.");
+      console.log("ℹ️ 'size' already exists");
     }
 
-    console.log("Updating designated products with accurate market prices and sizes...");
-    
-    // Update Calaris Xtra
-    await pool.query("UPDATE products SET size='700 ml', price=1000.00, category='Herbicides' WHERE name LIKE '%Calaris%'");
-    
-    // Update Koranda
-    await pool.query("UPDATE products SET size='500 ml', price=500.00 WHERE name LIKE '%Koranda%'");
-    
-    // Update Glycel
-    await pool.query("UPDATE products SET size='1 Liter', price=500.00 WHERE name LIKE '%Glycel%'");
-    
-    // Update Contaf
-    await pool.query("UPDATE products SET size='1 Liter', price=770.00 WHERE name LIKE '%CONTAF%'");
-    
-    // Update Tarbez
-    await pool.query("UPDATE products SET size='500 ml', price=350.00 WHERE name LIKE '%Tarbez%'");
+    console.log("Updating products...");
 
-    console.log("All products updated successfully!");
-    process.exit(0);
+    await pool.query("UPDATE products SET size='700 ml', price=1000 WHERE name LIKE '%Calaris%'");
+    await pool.query("UPDATE products SET size='500 ml', price=500 WHERE name LIKE '%Koranda%'");
+    await pool.query("UPDATE products SET size='1 Liter', price=500 WHERE name LIKE '%Glycel%'");
+    await pool.query("UPDATE products SET size='1 Liter', price=770 WHERE name LIKE '%CONTAF%'");
+    await pool.query("UPDATE products SET size='500 ml', price=350 WHERE name LIKE '%Tarbez%'");
+
+    console.log("✅ All products updated successfully!");
   } catch (error) {
-    console.error("Migration Error:", error);
-    process.exit(1);
+    console.error("❌ Migration Error:", error.message);
+  } finally {
+    await pool.end(); // ✅ clean close
   }
 }
 
