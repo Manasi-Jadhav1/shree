@@ -1615,23 +1615,37 @@ function init() {
   // Add product form (admin)
   document.getElementById('addProductForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = {
-      name: document.getElementById('prodName').value,
-      description: document.getElementById('prodDesc').value,
-      price: parseInt(document.getElementById('prodPrice').value),
-      size: document.getElementById('prodSize') ? document.getElementById('prodSize').value : '',
-      category: document.getElementById('prodCategory').value,
-      image_url: document.getElementById('prodImage').value
+    const name = document.getElementById('prodName').value;
+    const description = document.getElementById('prodDesc').value;
+    const price = parseInt(document.getElementById('prodPrice').value);
+    const size = document.getElementById('prodSize') ? document.getElementById('prodSize').value : '';
+    const category = document.getElementById('prodCategory').value;
+    const imageUrl = document.getElementById('prodImage').value;
+    const fileInput = document.getElementById('prodImageFile');
+
+    const submitProduct = async (img) => {
+      const payload = {
+        name, description, price, category, size,
+        image_url: img
+      };
+
+      const res = await apiCall('/products', { method: 'POST', body: JSON.stringify(payload) });
+      if (res.ok) {
+        document.getElementById('addProductForm').reset();
+        showToast('✅ Product added!');
+        loadProducts();
+        setTimeout(renderAdminProducts, 500);
+      } else {
+        showToast('❌ Error: ' + res.msg);
+      }
     };
 
-    const res = await apiCall('/products', { method: 'POST', body: JSON.stringify(payload) });
-    if (res.ok) {
-      document.getElementById('addProductForm').reset();
-      showToast('✅ Product added!');
-      loadProducts();
-      setTimeout(renderAdminProducts, 500);
+    if (fileInput.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = (ev) => submitProduct(ev.target.result);
+      reader.readAsDataURL(fileInput.files[0]);
     } else {
-      showToast('❌ Error: ' + res.msg);
+      submitProduct(imageUrl);
     }
   });
 
