@@ -648,48 +648,128 @@ function renderGallery() {
 }
 
 // ==================== ADMIN PANEL ====================
-function renderAdminProducts() {
-  const list = document.getElementById('adminProductsList');
-  if (!products || products.length === 0) {
-    list.innerHTML = '<p style="color:#999; padding:20px; text-align:center;">No products found. Add one above.</p>';
+async function renderAdminOrders() {
+  const list = document.getElementById('ordersList');
+  const countBadge = document.getElementById('ordersCountBadge');
+
+  list.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading orders...</td></tr>';
+  list.style.opacity = '0.6';
+
+  // ✅ Get token from localStorage
+  const token = localStorage.getItem('smk_token');
+
+  // ✅ Debug: Check if token exists
+  console.log('Token exists:', !!token);
+
+  if (!token) {
+    list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">
+      ❌ Not authenticated. Please login again.
+      <br><button onclick="logoutUser(); location.reload();" style="margin-top:10px; padding:8px 16px; background:#2b7a2b; color:white; border:none; border-radius:5px; cursor:pointer;">
+        Go to Login
+      </button>
+    </td></tr>`;
+    list.style.opacity = '1';
+    if (countBadge) countBadge.textContent = '0 orders';
     return;
   }
-  list.innerHTML = products.map(p => `
-    <div class="admin-product-item">
-      <div class="admin-product-info">
-        <div class="admin-product-name"><i class="fas fa-box-open" style="color:#2b5e2f; margin-right:6px;"></i><strong>${p.name}</strong></div>
-        <div class="admin-product-meta">${p.category} ${p.size ? `• <b>${p.size}</b>` : ''}</div>
-      </div>
-      <div class="admin-product-price-edit">
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          <label style="font-size:0.75rem; color:#666; font-weight:600;">${i18n[currentLanguage]['admin.prodPrice']}</label>
-          <input
-            type="number"
-            id="priceInput_${p.id}"
-            value="${p.price}"
-            min="1"
-            style="width:90px; padding:6px 10px; border:1px solid #cfdec5; border-radius:20px; font-size:0.85rem; font-weight:700; color:#1a2e1c;"
-          />
-        </div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          <label style="font-size:0.75rem; color:#666; font-weight:600;">${i18n[currentLanguage]['admin.size']}</label>
-          <input
-            type="text"
-            id="sizeInput_${p.id}"
-            value="${p.size || ''}"
-            placeholder="e.g. 1L"
-            style="width:90px; padding:6px 10px; border:1px solid #cfdec5; border-radius:20px; font-size:0.85rem; font-weight:700; color:#1a2e1c;"
-          />
-        </div>
-        <button class="update-price-btn" onclick="updateProduct(${p.id})" style="margin-top:18px;">
-          <i class="fas fa-check"></i> Save
-        </button>
-      </div>
-      <button class="delete-btn" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i> Delete</button>
-    </div>
-  `).join('');
-}
 
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    console.log('Response status:', res.status);
+
+    if (res.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('smk_token');
+      localStorage.removeItem('smk_user');
+      list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">
+        ⚠️ Session expired. Please login again.
+        <br><button onclick="logoutUser(); location.reload();" style="margin-top:10px; padding:8px 16px; background:#2b7a2b; color:white; border:none; border-radius:5px; cursor:pointer;">
+          Login
+        </button>
+      </td></tr>`;
+      list.style.opacity = '1';
+      return;
+    }
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('Error response:', errorText);
+      list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">
+        ❌ Error ${res.status}: Could not load orders. Make sure you are logged in as admin.
+      </td></tr>`;
+      list.style.opacity = '1';
+      return;
+    }
+
+    const orders = await res.json();
+    console.log('Orders loaded:', orders.length);
+
+    if (countBadge) countBadge.textContent = `${orders.length} orders`;
+
+    if (orders.length === 0) {
+      list.innerHTML = '<tr><td colspan="7" style="color:#999;text-align:center;padding:20px;">No orders yet.</td></tr>';
+      list.style.opacity = '1';
+      return;
+    }
+
+    list.innerHTML = orders.map(o => {
+      const d = new Date(o.created_at);
+      const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `
+        <tr>
+          <td><strong>#${o.id}</strong></td>
+          <td>
+            <div style="font-weight:600;">${o.customer_name}</div>
+            <div style="font-size:0.8rem; color:#666;">${o.phone || ''}</div>
+          </td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto;">
+              ${(o.items || []).map(i => `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                  <img src="${i.image_url}" class="mini-thumb" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
+                  <span style="font-size:0.85rem;">${i.name} ${i.size ? `(${i.size})` : ''} <b>×${i.quantity}</b></span>
+                </div>
+              `).join('')}
+            </div>
+          </td>
+          <td style="font-weight:bold;">₹${Number(o.total).toLocaleString()}</td>
+          <td style="text-align:center;">
+            <span class="pay-method-badge">${translateMethod(o.payment_method)}</span>
+            ${o.payment_proof ? `<br><a href="${o.payment_proof}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.75rem; padding:4px 8px; background:#eef6ee; color:#2b5e2f; border:1px solid #2b5e2f; border-radius:4px; text-decoration:none;"><i class="fas fa-image"></i> View Receipt</a>` : ''}
+          </td>
+          <td>${dateStr}</td>
+          <td>
+            <select class="status-select status-${o.status.toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
+              <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>${translateStatus('Processing')}</option>
+              <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>${translateStatus('Shipped')}</option>
+              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>${translateStatus('Delivered')}</option>
+            </select>
+          </td>
+          <td>
+            <button class="admin-delete-btn" onclick="deleteOrder(${o.id})" title="Delete Order">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    list.style.opacity = '1';
+
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">
+      🌐 Network error: Cannot connect to server. Please check if backend is running at ${API_BASE}
+    </td></tr>`;
+    list.style.opacity = '1';
+  }
+}
 async function updateProduct(id) {
   const priceInput = document.getElementById(`priceInput_${id}`);
   const sizeInput = document.getElementById(`sizeInput_${id}`);
