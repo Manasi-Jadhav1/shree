@@ -15,4 +15,7 @@ router.get('/', orderController.getOrders);
 // PUT /api/orders/:id/status (Admin only)
 router.put('/:id/status', isAdmin, orderController.updateOrderStatus);
 
+// DELETE /api/orders/:id (Admin only)
+router.delete('/:id', isAdmin, orderController.deleteOrder);
+
 module.exports = router;

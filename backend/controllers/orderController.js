@@ -206,3 +206,16 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: 'Server error updating order.' });
   }
 };
+
+// Delete order (Admin only)
+exports.deleteOrder = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Note: Foreign key constraints in schema.sql handle deletion from order_items
+    await pool.query('DELETE FROM orders WHERE id = ?', [id]);
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ message: 'Server error deleting order.' });
+  }
+};

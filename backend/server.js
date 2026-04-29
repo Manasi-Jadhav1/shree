@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { testConnection } = require('./config/db');
 
 // Import routes
@@ -17,7 +17,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Parse JSON request bodies
+app.use(express.json({ limit: '50mb' })); // Increased limit for larger base64 images and data
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Test DB Connection
 testConnection();
