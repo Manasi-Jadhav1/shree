@@ -1,7 +1,5 @@
-// script.js - Full-Stack Application
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '3000'
-  ? 'http://localhost:3000/api'
-  : '/api';
+// ==================== API CONFIGURATION ====================
+const API_BASE = 'https://shree-mxuo.onrender.com/api';
 
 // // ==================== I18N DICTIONARY ====================
 const i18n = {
