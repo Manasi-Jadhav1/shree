@@ -375,7 +375,7 @@ async function apiCall(endpoint, options = {}) {
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-    
+
     // Check if response is JSON
     const contentType = res.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
@@ -415,7 +415,7 @@ function updateAuthUI() {
     authButtons.style.display = 'none';
     userInfo.style.display = 'flex';
     document.getElementById('userNameDisplay').textContent = '👤 ' + user.name;
-    
+
     // If logged in, hide the auth gate
     authGate.classList.add('hidden');
     document.body.classList.remove('auth-locked');
@@ -431,7 +431,7 @@ function updateAuthUI() {
 
     const adminLink = document.getElementById('adminMenuLink');
     if (adminLink) adminLink.style.display = user.role === 'admin' ? 'inline-block' : 'none';
-    
+
     const userOrdersLink = document.getElementById('userOrdersLink');
     if (userOrdersLink) userOrdersLink.style.display = user.role === 'user' ? 'inline-block' : 'none';
 
@@ -702,7 +702,7 @@ async function updateProduct(id) {
 
   const res = await apiCall(`/products/${id}`, {
     method: 'PUT',
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       price: newPrice,
       size: newSize
     })
@@ -710,8 +710,8 @@ async function updateProduct(id) {
 
   if (res.ok) {
     showToast('✅ Product updated successfully!');
-    await loadProducts();           
-    setTimeout(renderAdminProducts, 400); 
+    await loadProducts();
+    setTimeout(renderAdminProducts, 400);
   } else {
     showToast('❌ Error: ' + res.msg);
   }
@@ -728,60 +728,84 @@ async function deleteProduct(id) {
     showToast('❌ ' + res.msg);
   }
 }
-
 async function renderAdminOrders() {
   const list = document.getElementById('ordersList');
   const countBadge = document.getElementById('ordersCountBadge');
+
   list.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading...</td></tr>';
-  const res = await apiCall('/orders');
-  if (!res.ok) { list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">Error: ${res.msg}</td></tr>`; return; }
 
-  const orders = res.data;
-  if (countBadge) countBadge.textContent = `${orders.length} orders`;
+  // ✅ IMPORTANT FIX: Get token from localStorage
+  const token = localStorage.getItem('smk_token');
 
-  if (orders.length === 0) { list.innerHTML = '<tr><td colspan="7" style="color:#999;text-align:center;padding:20px;">No orders yet.</td></tr>'; return; }
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
-  list.innerHTML = orders.map(o => {
-    const d = new Date(o.created_at);
-    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `
-      <tr>
-        <td><strong>#${o.id}</strong></td>
-        <td>
-          <div style="font-weight:600;">${o.customer_name}</div>
-          <div style="font-size:0.8rem; color:#666;">${o.phone}</div>
-        </td>
-        <td>
-          <div style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto;">
-            ${o.items.map(i => `
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                <img src="${i.image_url}" class="mini-thumb" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
-                <span style="font-size:0.85rem;">${i.name} ${i.size ? `(${i.size})` : ''} <b>×${i.quantity}</b></span>
-              </div>
-            `).join('')}
-          </div>
-        </td>
-        <td style="font-weight:bold;">₹${Number(o.total).toLocaleString()}</td>
-        <td style="text-align:center;">
-          <span class="pay-method-badge">${translateMethod(o.payment_method)}</span>
-          ${o.payment_proof ? `<br><a href="${o.payment_proof}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.75rem; padding:4px 8px; background:#eef6ee; color:#2b5e2f; border:1px solid #2b5e2f; border-radius:4px; text-decoration:none;"><i class="fas fa-image"></i> View Receipt</a>` : ''}
-        </td>
-        <td>${dateStr}</td>
-        <td>
-          <select class="status-select status-${o.status.toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
-            <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>${translateStatus('Processing')}</option>
-            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>${translateStatus('Shipped')}</option>
-            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>${translateStatus('Delivered')}</option>
-          </select>
-        </td>
-        <td>
-          <button class="admin-delete-btn" onclick="deleteOrder(${o.id})" title="Delete Order">
-            <i class="fas fa-trash"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+    if (!res.ok) {
+      const errorData = await res.json();
+      list.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">Error: ${errorData.message || 'Unauthorized'}</td></tr>`;
+      return;
+    }
+
+    const orders = await res.json();
+
+    if (countBadge) countBadge.textContent = `${orders.length} orders`;
+
+    if (orders.length === 0) {
+      list.innerHTML = '<tr><td colspan="7" style="color:#999;text-align:center;padding:20px;">No orders yet.</td></tr>';
+      return;
+    }
+
+    list.innerHTML = orders.map(o => {
+      const d = new Date(o.created_at);
+      const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `
+        <tr>
+          <td><strong>#${o.id}</strong></td>
+          <td>
+            <div style="font-weight:600;">${o.customer_name}</div>
+            <div style="font-size:0.8rem; color:#666;">${o.phone}</div>
+          </td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto;">
+              ${o.items.map(i => `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                  <img src="${i.image_url}" class="mini-thumb" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
+                  <span style="font-size:0.85rem;">${i.name} ${i.size ? `(${i.size})` : ''} <b>×${i.quantity}</b></span>
+                </div>
+              `).join('')}
+            </div>
+          </td>
+          <td style="font-weight:bold;">₹${Number(o.total).toLocaleString()}</td>
+          <td style="text-align:center;">
+            <span class="pay-method-badge">${translateMethod(o.payment_method)}</span>
+            ${o.payment_proof ? `<br><a href="${o.payment_proof}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.75rem; padding:4px 8px; background:#eef6ee; color:#2b5e2f; border:1px solid #2b5e2f; border-radius:4px; text-decoration:none;"><i class="fas fa-image"></i> View Receipt</a>` : ''}
+          </td>
+          <td>${dateStr}</td>
+          <td>
+            <select class="status-select status-${o.status.toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
+              <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>${translateStatus('Processing')}</option>
+              <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>${translateStatus('Shipped')}</option>
+              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>${translateStatus('Delivered')}</option>
+            </select>
+          </td>
+          <td>
+            <button class="admin-delete-btn" onclick="deleteOrder(${o.id})" title="Delete Order">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    list.innerHTML = '<tr><td colspan="7" style="color:red;text-align:center;">Network error: Cannot connect to server</td></tr>';
+  }
 }
 
 async function updateOrderStatus(id, status) {
@@ -795,7 +819,7 @@ async function updateOrderStatus(id, status) {
 
 async function deleteOrder(id) {
   if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
-  
+
   const res = await apiCall(`/orders/${id}`, { method: 'DELETE' });
   if (res.ok) {
     showToast('🗑️ Order deleted successfully!');
@@ -849,7 +873,7 @@ let ordersTimeChartInstance = null;
 
 async function deleteUser(id) {
   if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-  
+
   const res = await apiCall(`/users/${id}`, { method: 'DELETE' });
   if (res.ok) {
     showToast('🗑️ User deleted successfully!');
@@ -1210,10 +1234,10 @@ const aboutSlides = [
 function changeAboutSlide(index) {
   if (index === aboutCurrentSlide) return;
 
-  const mainImg    = document.getElementById('aboutSliderMainImg');
-  const captionEl  = document.getElementById('aboutSliderCaption');
+  const mainImg = document.getElementById('aboutSliderMainImg');
+  const captionEl = document.getElementById('aboutSliderCaption');
   const thumbItems = document.querySelectorAll('.about-thumb-item');
-  const dots       = document.querySelectorAll('.about-dot');
+  const dots = document.querySelectorAll('.about-dot');
 
   const direction = index > aboutCurrentSlide ? 'slide-in-right' : 'slide-in-left';
   aboutCurrentSlide = index;
@@ -1280,11 +1304,11 @@ function init() {
       navLinks.classList.toggle('show');
       rightControls.classList.toggle('show');
     });
-    
+
     // Close menu when a link is clicked
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
-        if(window.innerWidth <= 991) {
+        if (window.innerWidth <= 991) {
           navLinks.classList.remove('show');
           rightControls.classList.remove('show');
         }
@@ -1314,7 +1338,7 @@ function init() {
   if (userDashBtn) userDashBtn.addEventListener('click', openUserDashboard);
   const adminLinkEl = document.getElementById('adminMenuLink');
   if (adminLinkEl) adminLinkEl.addEventListener('click', (e) => { e.preventDefault(); openAdminDashboard(); });
-  
+
   const userOrdersLink = document.getElementById('userOrdersLink');
   if (userOrdersLink) {
     userOrdersLink.addEventListener('click', (e) => {
@@ -1385,7 +1409,7 @@ function init() {
       // Auto-open dashboard on login
       if (res.data.user.role === 'admin') openAdminDashboard();
       else openUserDashboard();
-      
+
       showToast('🎉 Welcome back, ' + res.data.user.name + '!');
       document.getElementById('loginForm').reset();
     } else {
@@ -1483,14 +1507,14 @@ function init() {
 
   // Checkout
   document.getElementById('checkoutBtn').addEventListener('click', processCheckout);
-  
+
   // Payment Method change -> show UPI section
   document.getElementById('paymentMethod').addEventListener('change', async (e) => {
     const upiSection = document.getElementById('upiPaymentSection');
     const screenshotInput = document.getElementById('upiScreenshot');
     const warningEl = document.getElementById('upiWarning');
     const amountInput = document.getElementById('upiAmountPaid');
-    
+
     if (warningEl) warningEl.style.display = 'none';
     if (amountInput) amountInput.value = '';
 
@@ -1499,7 +1523,7 @@ function init() {
       screenshotInput.required = true;
       const display = document.getElementById('checkoutUpiDisplay');
       const amountDisplay = document.getElementById('upiPayableAmount');
-      
+
       const total = getCartTotal();
       if (amountDisplay) amountDisplay.textContent = `₹${total.toLocaleString()}`;
 
@@ -1511,7 +1535,7 @@ function init() {
         // upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
         const upiUri = `upi://pay?pa=${topScanner.upi_id}&pn=${encodeURIComponent(topScanner.name)}&am=${total}&cu=INR`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
-        
+
         display.innerHTML = `
           <div style="margin-bottom:10px;">
             <img src="${qrUrl}" style="max-width:180px; border:4px solid white; box-shadow:0 4px 15px rgba(0,0,0,0.1); border-radius:12px;">
@@ -1543,7 +1567,7 @@ function init() {
     const address = document.getElementById('checkoutAddress').value;
     const pincode = document.getElementById('checkoutPincode').value;
     const payment = document.getElementById('paymentMethod').value;
-    
+
     if (payment === 'upi') {
       const amountPaid = parseFloat(document.getElementById('upiAmountPaid').value);
       const total = getCartTotal();
