@@ -336,11 +336,13 @@ function updateLanguage(lang) {
 }
 
 function translateStatus(status) {
+  if (!status) return 'Processing';
   const key = `status.${status.toLowerCase()}`;
   return (i18n[currentLanguage] && i18n[currentLanguage][key]) || status;
 }
 
 function translateMethod(method) {
+  if (!method) return 'cod';
   const key = `method.${method.toLowerCase()}`;
   return (i18n[currentLanguage] && i18n[currentLanguage][key]) || method;
 }
@@ -746,8 +748,8 @@ async function renderAdminOrders() {
           </td>
           <td>${dateStr}</td>
           <td>
-            <select class="status-select status-${o.status.toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
-              <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>${translateStatus('Processing')}</option>
+            <select class="status-select status-${(o.status || 'Processing').toLowerCase()}" onchange="updateOrderStatus(${o.id}, this.value)">
+              <option value="Processing" ${o.status === 'Processing' || !o.status ? 'selected' : ''}>${translateStatus('Processing')}</option>
               <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>${translateStatus('Shipped')}</option>
               <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>${translateStatus('Delivered')}</option>
             </select>
