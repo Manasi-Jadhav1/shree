@@ -43,26 +43,10 @@ exports.addProduct = async (req, res) => {
     const defaultImage = 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80';
     let final_image_url = image_url || defaultImage;
 
-    // Handle base64 image upload
+    // Handle base64 image upload by saving directly to the database
+    // This prevents image loss on ephemeral file systems (like Render, Vercel)
     if (image_url && image_url.startsWith('data:image')) {
-      try {
-        const matches = image_url.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const ext = matches[1].split('/')[1];
-          const buffer = Buffer.from(matches[2], 'base64');
-          const filename = `product_${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext || 'jpg'}`;
-          const productDir = path.join(__dirname, '../../frontend/images/products');
-          
-          if (!fs.existsSync(productDir)) {
-            fs.mkdirSync(productDir, { recursive: true });
-          }
-          
-          fs.writeFileSync(path.join(productDir, filename), buffer);
-          final_image_url = `images/products/${filename}`;
-        }
-      } catch (err) {
-        console.error('Error saving product image:', err);
-      }
+      final_image_url = image_url;
     }
     
     const [result] = await pool.query(
@@ -104,20 +88,7 @@ exports.updateProduct = async (req, res) => {
 
     let final_image_url = image_url;
     if (image_url && image_url.startsWith('data:image')) {
-      try {
-        const matches = image_url.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const ext = matches[1].split('/')[1];
-          const buffer = Buffer.from(matches[2], 'base64');
-          const filename = `product_${Date.now()}_${Math.floor(Math.random() * 1000)}.${ext || 'jpg'}`;
-          const productDir = path.join(__dirname, '../../frontend/images/products');
-          if (!fs.existsSync(productDir)) fs.mkdirSync(productDir, { recursive: true });
-          fs.writeFileSync(path.join(productDir, filename), buffer);
-          final_image_url = `images/products/${filename}`;
-        }
-      } catch (err) {
-        console.error('Error saving product image:', err);
-      }
+      final_image_url = image_url;
     }
 
     if (price !== undefined)       { fields.push('price = ?');       params.push(price); }
