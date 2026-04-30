@@ -355,6 +355,13 @@ let sortBy = "default";
 let cart = JSON.parse(localStorage.getItem('smk_cart') || '[]');
 let products = [];
 let currentDetailProduct = null;
+
+// Helper: only add cache-busting for http/https URLs, NOT for base64 data URLs
+function getImageSrc(url) {
+  if (!url) return 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80';
+  if (url.startsWith('data:')) return url; // base64 — return as-is
+  return url + '?t=' + Date.now(); // regular URL — add cache-buster
+}
 const galleryData = [
   { title: "Premium Wheat Harvest", image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=800&auto=format&fit=crop" },
   { title: "Healthy Vegetable Production", image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?q=80&w=800&auto=format&fit=crop" },
@@ -543,7 +550,7 @@ function renderCart() {
   container.innerHTML = cart.map(item => `
     <div class="cart-item">
       <div class="cart-item-info">
-        <img src="${item.image_url}?t=${Date.now()}" class="cart-item-img" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
+        <img src="${getImageSrc(item.image_url)}" class="cart-item-img" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
         <div class="cart-item-details">
           <strong>${item.name}</strong>
           <span>₹${item.price.toLocaleString()} × ${item.qty} ${item.size ? `• ${item.size}` : ''}</span>
@@ -599,7 +606,7 @@ function renderProductsUI() {
 
   grid.innerHTML = products.map(product => `
     <div class="product-card">
-      <div class="product-img"><img src="${product.image_url}?t=${Date.now()}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'"></div>
+      <div class="product-img"><img src="${getImageSrc(product.image_url)}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'"></div>
       <div class="product-title">${product.name}</div>
       <div class="product-category">${product.category} ${product.size ? `<span style="background:#eef6ee; color:#2b5e2f; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.75rem; margin-left:6px;"><i class="fas fa-weight-hanging"></i> ${product.size}</span>` : ''}</div>
       <div class="product-desc">${product.description.substring(0, 80)}...</div>
@@ -615,7 +622,7 @@ function openProductDetail(id) {
   currentDetailProduct = products.find(p => p.id === id);
   if (!currentDetailProduct) return;
 
-  document.getElementById('detailImage').src = `${currentDetailProduct.image_url}?t=${Date.now()}`;
+  document.getElementById('detailImage').src = getImageSrc(currentDetailProduct.image_url);
   document.getElementById('detailName').textContent = currentDetailProduct.name;
   document.getElementById('detailPrice').textContent = `₹${Number(currentDetailProduct.price).toLocaleString()}`;
   document.getElementById('detailOldPrice').textContent = Math.round(currentDetailProduct.price * 1.22); // mock old price
@@ -818,7 +825,7 @@ function renderAdminProducts() {
 
   list.innerHTML = products.map(p => `
     <div class="admin-product-item" style="display:flex; align-items:center; gap:15px; padding:15px; border-bottom:1px solid #eee;">
-      <img src="${p.image_url}?t=${Date.now()}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
+      <img src="${getImageSrc(p.image_url)}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" onerror="this.src='https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop&q=80'">
       <div style="flex:1;">
         <div style="font-weight:bold; color:#2b5e2f;">${p.name}</div>
         <div style="font-size:0.85rem; color:#666;">${p.category} ${p.size ? `• ${p.size}` : ''}</div>
